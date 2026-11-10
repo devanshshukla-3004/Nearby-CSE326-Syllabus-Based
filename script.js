@@ -64,8 +64,15 @@ $("locateBtn").addEventListener("click", () => {
     {enableHighAccuracy:true, timeout:12000, maximumAge:60000}
   );
 });
-$("toggleFormBtn").addEventListener("click", () => { form.hidden = !form.hidden; if (!form.hidden) form.scrollIntoView({behavior:"smooth",block:"center"}); });
-$("closeFormBtn").addEventListener("click", () => { form.hidden = true; });
+$("toggleFormBtn").addEventListener("click", () => {
+  if (form.hidden) {
+    editingId = null; form.reset(); $("toggleFormBtn").textContent = "＋ Add a service";
+    form.hidden = false; form.scrollIntoView({behavior:"smooth",block:"center"});
+  } else form.hidden = true;
+});
+$("closeFormBtn").addEventListener("click", () => {
+  form.hidden = true; form.reset(); editingId = null; $("toggleFormBtn").textContent = "＋ Add a service";
+});
 form.addEventListener("submit", event => {
   event.preventDefault();
   const data = new FormData(form);
