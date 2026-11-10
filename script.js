@@ -19,7 +19,8 @@ services = readSaved();
 
 function save() {
   try { localStorage.setItem(KEY, JSON.stringify(services)); }
-  catch (error) { $("locationStatus").textContent = "Unable to save: browser storage is unavailable."; }
+  catch (error) { $("locationStatus").textContent = "Could not save changes. Browser storage may be disabled or full."; return false; }
+  return true;
 }
 function safe(value) {
   return String(value || "").replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
@@ -42,6 +43,8 @@ function render() {
   $("visibleCount").textContent = rows.length;
   $("resultSummary").textContent = rows.length + (rows.length === 1 ? " result" : " results");
   $("emptyState").classList.toggle("visible", rows.length === 0);
+  $("emptyState").querySelector("h3").textContent = services.length === 0 ? "No services saved yet" : "No matching services";
+  $("emptyState").querySelector("p").textContent = services.length === 0 ? "Add a service to start building your personal directory." : "Try another search term or choose a different category.";
   const icons = {Hospital:"✚",Clinic:"⚕",Pharmacy:"＋",Police:"♜",Fire:"♨",Ambulance:"＋",Other:"⌖"};
   $("serviceList").innerHTML = rows.map(item => {
     const km = item.km === null ? "—" : item.km < 1 ? Math.round(item.km*1000)+" m" : item.km.toFixed(1)+" km";
@@ -67,11 +70,12 @@ $("locateBtn").addEventListener("click", () => {
 $("toggleFormBtn").addEventListener("click", () => {
   if (form.hidden) {
     editingId = null; form.reset(); $("toggleFormBtn").textContent = "＋ Add a service";
+    form.querySelector(".form-heading h3").textContent = "Add a service";
     form.hidden = false; form.scrollIntoView({behavior:"smooth",block:"center"});
-  } else form.hidden = true;
+  } else { form.hidden = true; editingId = null; form.reset(); $("toggleFormBtn").textContent = "＋ Add a service"; form.querySelector(".form-heading h3").textContent = "Add a service"; }
 });
 $("closeFormBtn").addEventListener("click", () => {
-  form.hidden = true; form.reset(); editingId = null; $("toggleFormBtn").textContent = "＋ Add a service";
+  form.hidden = true; form.reset(); editingId = null; $("toggleFormBtn").textContent = "＋ Add a service"; form.querySelector(".form-heading h3").textContent = "Add a service";
 });
 form.addEventListener("submit", event => {
   event.preventDefault();
@@ -102,6 +106,7 @@ $("serviceList").addEventListener("click", event => {
     if (!item) return;
     ["name","category","phone","address","latitude","longitude"].forEach(key => form.elements[key].value = item[key] ?? "");
     editingId = item.id;
+    form.querySelector(".form-heading h3").textContent = "Edit service";
     form.hidden = false; $("toggleFormBtn").textContent = "＋ Save edited service";
     form.scrollIntoView({behavior:"smooth",block:"center"}); render();
   }
