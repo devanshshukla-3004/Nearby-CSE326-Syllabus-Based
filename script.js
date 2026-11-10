@@ -4,6 +4,7 @@ const $ = id => document.getElementById(id);
 const form = $("serviceForm");
 let services = [];
 let locationPoint = null;
+let editingId = null;
 
 function readSaved() {
   try {
@@ -70,7 +71,10 @@ form.addEventListener("submit", event => {
   const data = new FormData(form);
   const lat = Number(data.get("latitude")), lon = Number(data.get("longitude"));
   if (!Number.isFinite(lat) || lat < -90 || lat > 90 || !Number.isFinite(lon) || lon < -180 || lon > 180) { alert("Enter valid latitude and longitude."); return; }
-  services.push({id:"service-"+Date.now(),name:String(data.get("name")).trim(),category:String(data.get("category")),phone:String(data.get("phone")).trim(),address:String(data.get("address")).trim(),latitude:lat,longitude:lon});
+  const updated = {id: editingId || "service-"+Date.now(),name:String(data.get("name")).trim(),category:String(data.get("category")),phone:String(data.get("phone")).trim(),address:String(data.get("address")).trim(),latitude:lat,longitude:lon};
+  if (editingId) services = services.map(item => item.id === editingId ? updated : item);
+  else services.push(updated);
+  editingId = null;
   save(); form.reset(); form.hidden = true; $("toggleFormBtn").textContent = "＋ Add a service"; render();
 });
 $("manualLocationForm").addEventListener("submit", event => {
@@ -90,7 +94,7 @@ $("serviceList").addEventListener("click", event => {
     const item = services.find(row => row.id === edit.dataset.edit);
     if (!item) return;
     ["name","category","phone","address","latitude","longitude"].forEach(key => form.elements[key].value = item[key] ?? "");
-    services = services.filter(row => row.id !== item.id); save();
+    editingId = item.id;
     form.hidden = false; $("toggleFormBtn").textContent = "＋ Save edited service";
     form.scrollIntoView({behavior:"smooth",block:"center"}); render();
   }
