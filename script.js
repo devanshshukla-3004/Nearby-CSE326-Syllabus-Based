@@ -86,7 +86,7 @@ form.addEventListener("submit", event => {
   if (editingId) services = services.map(item => item.id === editingId ? updated : item);
   else services.push(updated);
   editingId = null;
-  save(); form.reset(); form.hidden = true; $("toggleFormBtn").textContent = "＋ Add a service"; render();
+  save(); form.reset(); form.hidden = true; $("toggleFormBtn").textContent = "＋ Add a service"; form.querySelector(".form-heading h3").textContent = "Add a service"; render();
 });
 $("manualLocationForm").addEventListener("submit", event => {
   event.preventDefault();
